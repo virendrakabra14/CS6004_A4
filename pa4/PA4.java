@@ -22,17 +22,14 @@ public class PA4 {
             "-cp", classPath, "-pp", // sets the class path for Soot
             "-keep-line-number", // preserves line numbers in input Java files
             // "-f", "J",
-            // "-p", "jap.npcolorer", "on",
-            "-main-class", "Test",	// specify the main class
-            "Test", "Node"                  // list the classes to analyze
+            "-main-class", "Test2",	// specify the main class
+            "Test2", "Node2"                  // list the classes to analyze
         };
 
         // Create transformer for analysis
         AnalysisTransformer analysisTransformer = new AnalysisTransformer();
 
         // Add transformer to appropriate pack in PackManager; PackManager will run all packs when soot.Main.main is called
-        PackManager.v().getPack("jop").remove("cbf");
-        PackManager.v().getPack("jop").remove("cpf");
         PackManager.v().getPack("jtp").add(new Transform("jtp.dfa", analysisTransformer));
 
         // Call Soot's main method with arguments
