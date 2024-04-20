@@ -17,17 +17,26 @@ import soot.toolkits.graph.CompleteUnitGraph;
 import soot.jimple.toolkits.annotation.nullcheck.NullnessAnalysis;
 
 public class AnalysisTransformer extends BodyTransformer {
+    static boolean DEBUG = true;
+
+    private void printDebug(Object s) {
+        if(DEBUG) { System.out.println(s); }
+    }
+
     private Unit handleConstant(
         Constant constOp,
         Value otherOp,
         boolean isEq,
         JIfStmt defaultUnit,
-        NullnessAnalysis na
+        NullnessAnalysis nullnessAnalysis
     ) {
         /*
          * Remove the condition check since
          * one of the arguments is constant
          */
+
+        printDebug("constOp="+constOp);
+        printDebug("otherOp="+otherOp);
 
         Unit retUnit = defaultUnit;
 
@@ -53,8 +62,28 @@ public class AnalysisTransformer extends BodyTransformer {
             Immediate otherOpImmediate = (Immediate)otherOp;
 
             if(constOp instanceof NullConstant) {
-                if(na.isAlwaysNullBefore(defaultUnit, otherOpImmediate)) {
-                    // TODO
+                printDebug(nullnessAnalysis.isAlwaysNullBefore(defaultUnit, otherOpImmediate));
+                printDebug(nullnessAnalysis.isAlwaysNonNullBefore(defaultUnit, otherOpImmediate));
+                if(nullnessAnalysis.isAlwaysNullBefore(defaultUnit, otherOpImmediate)) {
+                    // both operands are null
+                    if(isEq) {
+                        Stmt target = defaultUnit.getTarget();
+                        retUnit = new JGotoStmt(target);
+                    }
+                    else {
+                        retUnit = new JNopStmt();
+                    }
+                }
+                else if(nullnessAnalysis.isAlwaysNonNullBefore(defaultUnit, otherOpImmediate)) {
+                    // one operand is null, other is not
+                    // do opposite of previous block
+                    if(!isEq) {
+                        Stmt target = defaultUnit.getTarget();
+                        retUnit = new JGotoStmt(target);
+                    }
+                    else {
+                        retUnit = new JNopStmt();
+                    }
                 }
             }
         }
@@ -64,7 +93,7 @@ public class AnalysisTransformer extends BodyTransformer {
 
     private Unit handleJIfStmt(
         JIfStmt ifStmt,
-        NullnessAnalysis na
+        NullnessAnalysis nullnessAnalysis
     ) {
         Unit retUnit = ifStmt; // default: same statement as appears
 
@@ -92,12 +121,12 @@ public class AnalysisTransformer extends BodyTransformer {
 
             if(op1 instanceof Constant) {
                 Constant constOp1 = (Constant)op1;
-                retUnit = handleConstant(constOp1, op2, isEq, ifStmt, na);
+                retUnit = handleConstant(constOp1, op2, isEq, ifStmt, nullnessAnalysis);
             }
             else if(op2 instanceof Constant) {
                 Constant constOp2 = (Constant)op2;
                 // same function works due to commutativity of eq and neq
-                retUnit = handleConstant(constOp2, op1, isEq, ifStmt, na);
+                retUnit = handleConstant(constOp2, op1, isEq, ifStmt, nullnessAnalysis);
             }
         }
 
@@ -110,9 +139,7 @@ public class AnalysisTransformer extends BodyTransformer {
         String phaseName,
         Map<String, String> options
     ) {
-        boolean DEBUG = true;
-
-        NullnessAnalysis na = new NullnessAnalysis(new CompleteUnitGraph(body));
+        NullnessAnalysis nullnessAnalysis = new NullnessAnalysis(new CompleteUnitGraph(body));
 
         // Iterate over all units (instructions) in the method body
         PatchingChain<Unit> units = body.getUnits();
@@ -122,22 +149,23 @@ public class AnalysisTransformer extends BodyTransformer {
             worklist.addLast(u);
         }
 
-        // Iterate over instructions and replace iadd with imul
-        Iterator<Unit> unitIt = units.snapshotIterator();
         while (worklist.size() != 0) {
 
             Unit unit = worklist.removeFirst();
-            if(DEBUG) { System.out.println(unit + ": "); }
+            printDebug(unit + ":");
 
             if(unit instanceof JIfStmt) {
+                printDebug("ifstmt");
                 JIfStmt ifStmt = (JIfStmt)unit;
-                Unit unitToPut = handleJIfStmt(ifStmt, na);
+                Unit unitToPut = handleJIfStmt(ifStmt, nullnessAnalysis);
                 if(unit != unitToPut) {
+                    printDebug("swapping!!");
                     units.swapWith(unit, unitToPut);
                     // TODO: add successors to worklist?
                 }
             }
 
+            printDebug("");
         }
     }
 }
