@@ -152,4 +152,32 @@ Averages
 
 Percent improvement
 (40.2370808-38.4378022)/40.2370808 ~ 4.47%
+
+-----
+
+Without Xint
+
+pa4$ bash run.sh t . Test5 Node5
+Elapsed Time: 47.77772
+Elapsed Time: 48.436636
+pa4$ bash run.sh t . Test5 Node5
+Elapsed Time: 49.816804
+Elapsed Time: 47.198136
+pa4$ bash run.sh t . Test5 Node5
+Elapsed Time: 48.815301
+Elapsed Time: 15.393305
+pa4$ bash run.sh t . Test5 Node5
+Elapsed Time: 47.645426
+Elapsed Time: 16.325682
+pa4$ bash run.sh t . Test5 Node5
+Elapsed Time: 48.867856
+Elapsed Time: 47.752645
+
+Averages
+48.5846214
+35.0212808
+
+Percent improvement
+~ 27.92%
+
 */
