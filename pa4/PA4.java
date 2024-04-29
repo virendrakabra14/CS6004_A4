@@ -1,30 +1,21 @@
-import java.util.Iterator;
-import java.util.List;
-
+import java.util.*;
 import soot.*;
-import soot.Body;
-import soot.NormalUnitPrinter;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Unit;
-import soot.UnitPrinter;
-import soot.toolkits.graph.ExceptionalUnitGraph;
-import soot.toolkits.graph.UnitGraph;
-import soot.jimple.internal.*;
 
 public class PA4 {
     public static void main(String[] args) {
-        String classPath = "."; 	// change to appropriate path to the test class
+        String classPath = args[0];
+        String mainClass = args[1];
 
-        //Set up arguments for Soot
-        String[] sootArgs = {
-            "-cp", classPath, "-pp", // sets the class path for Soot
-            "-keep-line-number", // preserves line numbers in input Java files
-            // "-f", "J",
-            "-main-class", "Test2",	// specify the main class
-            "Test2", "Node2"                  // list the classes to analyze
-        };
+        // Set up arguments for Soot
+        List<String> sootArgsList = new ArrayList<>(Arrays.asList(
+            "-cp", classPath, "-pp",    // sets the class path for Soot
+            "-main-class", mainClass    // specify the main class
+        ));
+
+        // Add classes to analyse
+        for(int i = 1; i < args.length; i++) {
+            sootArgsList.add(args[i]);
+        }
 
         // Create transformer for analysis
         AnalysisTransformer analysisTransformer = new AnalysisTransformer();
@@ -33,6 +24,6 @@ public class PA4 {
         PackManager.v().getPack("jtp").add(new Transform("jtp.dfa", analysisTransformer));
 
         // Call Soot's main method with arguments
-        soot.Main.main(sootArgs);
+        soot.Main.main(sootArgsList.stream().toArray(String[]::new));
     }
 }
