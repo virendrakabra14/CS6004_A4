@@ -6,18 +6,14 @@ import soot.jimple.internal.JGotoStmt;
 import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JNeExpr;
 import soot.jimple.internal.JNopStmt;
-import soot.jimple.AssignStmt;
 import soot.jimple.ConditionExpr;
 import soot.jimple.Constant;
-import soot.jimple.AddExpr;
-import soot.jimple.MulExpr;
 import soot.jimple.NullConstant;
-import soot.jimple.Jimple;
 import soot.toolkits.graph.CompleteUnitGraph;
 import soot.jimple.toolkits.annotation.nullcheck.NullnessAnalysis;
 
 public class AnalysisTransformer extends BodyTransformer {
-    static boolean DEBUG = true;
+    static boolean DEBUG = false;
 
     private void printDebug(Object s) {
         if(DEBUG) { System.out.println(s); }
@@ -161,7 +157,6 @@ public class AnalysisTransformer extends BodyTransformer {
                 if(unit != unitToPut) {
                     printDebug("swapping!!");
                     units.swapWith(unit, unitToPut);
-                    // TODO: add successors to worklist?
                 }
             }
 
