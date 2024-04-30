@@ -12,3 +12,10 @@
     - For `c`, openj9 must have been compiled with `#define TRACE_NULLCHECK_TRANSITIONS`. This logs `ifnull` and `ifnonnull` and these are later counted. This is by default done on our submission repository
     - For `t`, the same must be `#undef TRACE_NULLCHECK_TRANSITIONS`. Further, other tracing also must be off for accurate timing (e.g., `#undef TRACE_TRANSITIONS`)
 - This assumes that analysis, test, and soot files are located in `pa4` directory.
+- Commands to run tests mentioned in report
+    ```bash
+    # follow above instructions for `c` and `t`
+    bash run.sh c . Test4 Node4
+    bash run.sh t . Test5 Node5
+    bash run.sh c . Test6 Test6\$Foo Test6\$Foo\$Bar Test6\$Foo\$Bar\$Zoo
+    ```
