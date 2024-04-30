@@ -22,7 +22,6 @@ openj9-javac -cp '.:sootclasses-trunk-jar-with-dependencies.jar' *.java 2>/dev/n
 openj9-java -cp '.:sootclasses-trunk-jar-with-dependencies.jar' PA4 "$@" 2>/dev/null 1>&2 || exit 1
 
 # run test
-
 if [[ "$command" == "t" ]]; then
     openj9-java -cp '.:sootclasses-trunk-jar-with-dependencies.jar' -Xint "$2"
     cd sootOutput
@@ -34,7 +33,8 @@ elif [[ "$command" == "c" ]]; then
     classes=("${@:2}")
     regex="CS6004.*("
     for class in "${classes[@]}"; do
-        regex+="$class|"
+        class_escaped=$(printf '%s\n' "$class" | sed 's/[[\.*^$/]/\\&/g')
+        regex+="$class_escaped|"
     done
     regex="${regex%|}"
     regex+=")\."
