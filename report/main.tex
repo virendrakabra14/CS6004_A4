@@ -19,7 +19,7 @@ We have chosen to perform the null check analysis and subsequently remove redund
 \end{itemize}
 
 \section{Methodology}
-In order to perform the analysis, we utilise the Nullness analysis provided by the soot framework. We perform the transformation by checking all null checks in the intermediate code, and if we encounter a null check which the analysis tells us is always null or non null, then the redundant if statement is replaced directly with a goto/nop statement. 
+In order to perform the analysis, we utilise the Nullness analysis provided by the soot framework. This is an intra-procedural analysis, hence not very precise. We perform the transformation by checking all null checks in the intermediate code, and if we encounter a null check which the analysis tells us is always null or non null, then the redundant if statement is replaced directly with a goto/nop statement. 
 
 In order to evaluate the effectiveness of this, we modified the openj9 VM's bytecode interpreter. The main way we counted the number of nulls and non nulls was by intercepting the ifnull and ifnonnull handlers inside the bytecode. We added a print (j9tty\_printf) statement inside this to log the function (context) in which this statement was called, and utilised this to log the total number of calls to these functions and the number that was actually null / non null.
 
@@ -34,6 +34,7 @@ A point to note here is that a large number of JVM functionalities use these fun
 \item The results are as follows: The original bytecode consisted of $9$ ifnull / ifnonnull checks, whereas bytecode from our transformed class consisted of only $1$ such check.
 \item We also tried a timing-benchmark with \texttt{System.nanotime} but it was not always better for \texttt{Test4.java} with \texttt{main} looping $10^6$ times - this was probably due to efficient CPU-branch-prediction.
 \item To make this harder, we randomized test function calls in \texttt{Test5.java}. Over $10^6$ calls and averaged over $5$ runs, there was an improvement of $4.47\%$ from 40.237ms to 38.437ms. Interestingly, in this case, we got much greater gains without interpreter mode: $27.92\%$, arising mostly from $2$ runs out of the $5$ we averaged over - this is probably due to the profile-based manner in which the runtime works.
+\item On a more involved \texttt{Test6.java}, we saw an improvement from $11600$ to $5890$ nullchecks.
 \end{itemize}
 
 All files mentioned here are inside the \texttt{pa4} folder in the soot-analysis repository mentioned in section 1. Instructions to run the bash script are present in the README of the \texttt{pa4} folder.
